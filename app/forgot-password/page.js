@@ -1,0 +1,4 @@
+import Link from "next/link";
+import { Mail } from "lucide-react";
+import { AuthShell } from "@/components/auth/AuthShell";
+export default function ForgotPasswordPage() { return <AuthShell title="Reset your password" subtitle="Password recovery is being prepared for the future email integration phase." footer={<>Remembered your password? <Link href="/login" className="text-violet-300">Back to sign in</Link></>}><div className="mt-8 rounded-2xl border border-amber-400/20 bg-amber-400/10 p-5"><Mail className="text-amber-200" size={22} /><p className="mt-3 text-sm font-semibold text-amber-100">Email recovery is not enabled yet.</p><p className="mt-2 text-xs leading-5 text-amber-100/60">No email was sent and no reset token was created. Resend integration will be added in a later phase.</p></div></AuthShell>; }

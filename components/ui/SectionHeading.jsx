@@ -1,0 +1,1 @@
+export function SectionHeading({ eyebrow, title, action }) { return <div className="mb-5 flex items-end justify-between"><div>{eyebrow && <p className="mb-2 text-xs font-semibold uppercase tracking-[.18em] text-violet-400">{eyebrow}</p>}<h2 className="display-font text-xl font-semibold tracking-tight">{title}</h2></div>{action}</div>; }

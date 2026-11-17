@@ -1,0 +1,1 @@
+export function Select({ label, children, ...props }) { return <label className="block text-xs font-semibold text-zinc-300">{label}<select className="mt-2 w-full rounded-xl border border-zinc-700 bg-[#101014] px-3 py-2.5 text-sm text-zinc-300 outline-none focus:border-violet-400" {...props}>{children}</select></label>; }

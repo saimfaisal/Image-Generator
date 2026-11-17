@@ -1,0 +1,1 @@
+export function Input({ label, ...props }) { return <label className="block text-xs font-semibold text-zinc-300">{label}<input className="mt-2 w-full rounded-xl border border-zinc-700 bg-[#101014] px-3 py-2.5 text-sm text-zinc-200 outline-none transition placeholder:text-zinc-600 focus:border-violet-400" {...props} /></label>; }

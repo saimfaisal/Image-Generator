@@ -1,0 +1,2 @@
+import { FolderOpen } from "lucide-react";
+export function EmptyState({ title = "Nothing here yet", text = "Your activity will appear here when you start creating." }) { return <div className="rounded-2xl border border-dashed border-zinc-800 bg-zinc-900/30 p-12 text-center"><FolderOpen className="mx-auto text-zinc-600" size={30} /><p className="mt-4 text-sm font-semibold text-zinc-300">{title}</p><p className="mx-auto mt-1 max-w-sm text-xs leading-5 text-zinc-600">{text}</p></div>; }

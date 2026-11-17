@@ -1,0 +1,5 @@
+"use client";
+import { ChevronDown } from "lucide-react";
+import { useState } from "react";
+const questions = [["Do I need design experience?", "Not at all. PixelForge is built to help you go from an idea to a polished visual with a simple prompt."], ["Is this a real AI editor?", "Phase 2 is a complete UI foundation. AI processing and secure uploads will be connected in a future phase."], ["Can I cancel a plan?", "Pricing is illustrative for now. Billing and subscriptions will be added in a later release."]];
+export function FAQ() { const [active, setActive] = useState(0); return <div className="mx-auto max-w-2xl space-y-3">{questions.map(([q, a], index) => <div key={q} className="rounded-2xl border border-zinc-800 bg-[#18181f]"><button onClick={() => setActive(active === index ? -1 : index)} className="flex w-full items-center justify-between p-5 text-left text-sm font-semibold" aria-expanded={active === index}>{q}<ChevronDown size={18} className={`transition ${active === index ? "rotate-180 text-violet-300" : "text-zinc-600"}`} /></button>{active === index && <p className="px-5 pb-5 text-sm leading-6 text-zinc-500">{a}</p>}</div>)}</div>; }
