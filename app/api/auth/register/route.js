@@ -12,7 +12,11 @@ export async function POST(request) {
       throw new ApiError(503, "DATABASE_UNAVAILABLE", "Account creation is temporarily unavailable.");
     }
     const rate = await checkRateLimit({ request, scope: "auth.register", limit: 5, windowMs: 15 * 60_000 });
-    if (!rate.allowed) throw new ApiError(429, "RATE_LIMITED", "Too many registration attempts. Please try again later.");
+    // Registration must remain available before a user can be authenticated.
+    // Expensive AI endpoints still fail closed when production rate limiting
+    // is not configured, while account creation uses the local guard until a
+    // distributed provider is approved and connected.
+    if (!rate.unavailable && !rate.allowed) throw new ApiError(429, "RATE_LIMITED", "Too many registration attempts. Please try again later.");
     const parsed = await parseBody(request, registrationSchema);
     const { name, password } = parsed;
     const email = parsed.email.toLowerCase();
