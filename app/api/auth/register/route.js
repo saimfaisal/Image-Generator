@@ -1,24 +1,31 @@
-import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { registrationSchema } from "@/lib/validations/auth";
+import { ApiError, jsonError, jsonSuccess } from "@/lib/api/errors";
+import { getRequestId, logRequest, parseBody } from "@/lib/api/request";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export async function POST(request) {
+  const requestId = getRequestId(request);
   try {
     if (!process.env.DATABASE_URL) {
-      return NextResponse.json({ error: "Database is not configured. Add DATABASE_URL to .env.local and restart the dev server." }, { status: 503 });
+      throw new ApiError(503, "DATABASE_UNAVAILABLE", "Account creation is temporarily unavailable.");
     }
-    const parsed = registrationSchema.safeParse(await request.json());
-    if (!parsed.success) return NextResponse.json({ error: "Invalid registration details.", fields: parsed.error.flatten().fieldErrors }, { status: 400 });
-    const { name, password } = parsed.data;
-    const email = parsed.data.email.toLowerCase();
+    const rate = await checkRateLimit({ request, scope: "auth.register", limit: 5, windowMs: 15 * 60_000 });
+    if (!rate.allowed) throw new ApiError(429, "RATE_LIMITED", "Too many registration attempts. Please try again later.");
+    const parsed = await parseBody(request, registrationSchema);
+    const { name, password } = parsed;
+    const email = parsed.email.toLowerCase();
     const existing = await prisma.user.findUnique({ where: { email }, select: { id: true } });
-    if (existing) return NextResponse.json({ error: "Unable to create account with those details." }, { status: 409 });
+    if (existing) throw new ApiError(409, "CONFLICT", "Unable to create account with those details.");
     const passwordHash = await bcrypt.hash(password, 12);
     const user = await prisma.user.create({ data: { name, email, passwordHash }, select: { id: true, name: true, email: true, role: true, createdAt: true } });
-    return NextResponse.json({ user }, { status: 201 });
+    const response = jsonSuccess({ user }, { requestId, status: 201 });
+    logRequest(request, { requestId, scope: "auth.register", status: 201 });
+    return response;
   } catch (error) {
-    console.error("Registration failed", error instanceof Error ? error.message : "unknown error");
-    return NextResponse.json({ error: "Unable to create account right now." }, { status: 500 });
+    const response = jsonError(error, { requestId });
+    logRequest(request, { requestId, scope: "auth.register", status: response.status });
+    return response;
   }
 }

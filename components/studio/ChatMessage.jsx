@@ -1,0 +1,4 @@
+export function ChatMessage({ role, content, pending = false }) {
+  const assistant = role === "ASSISTANT";
+  return <div className={`flex gap-3 ${assistant ? "" : "flex-row-reverse"}`}><div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-xs font-bold ${assistant ? "bg-violet-500 text-white" : "bg-zinc-800 text-zinc-300"}`}>{assistant ? "✦" : "You"}</div><div className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-6 ${assistant ? "rounded-tl-sm border border-white/[.07] bg-[#18181f] text-zinc-200" : "rounded-tr-sm bg-violet-500 text-white"}`}>{pending ? <span className="inline-flex gap-1"><i className="h-1.5 w-1.5 animate-bounce rounded-full bg-current" /><i className="h-1.5 w-1.5 animate-bounce rounded-full bg-current [animation-delay:120ms]" /><i className="h-1.5 w-1.5 animate-bounce rounded-full bg-current [animation-delay:240ms]" /></span> : content}</div></div>;
+}

@@ -14,6 +14,7 @@ enum Role {
 }
 
 enum GenerationStatus {
+  PENDING
   QUEUED
   PROCESSING
   COMPLETED
@@ -40,20 +41,58 @@ enum SubscriptionStatus {
   INCOMPLETE
 }
 
+enum MessageRole {
+  USER
+  ASSISTANT
+  SYSTEM
+  TOOL
+}
+
+enum MessageStatus {
+  PENDING
+  STREAMING
+  COMPLETED
+  FAILED
+}
+
+enum VideoGenerationStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
 model User {
   id                String              @id @default(cuid())
   name              String
   email             String              @unique
   passwordHash      String
   image             String?
+  emailVerified     DateTime?
   role              Role                @default(USER)
   projects          Project[]
   images            Image[]
   generations       Generation[]
   creditTransactions CreditTransaction[]
   subscription      Subscription?
+  passwordResetTokens PasswordResetToken[]
+  conversations     Conversation[]
+  videoGenerations  VideoGeneration[]
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
 }
 
 model Project {
@@ -64,10 +103,70 @@ model Project {
   user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   images      Image[]
   generations Generation[]
+  videoGenerations VideoGeneration[]
+  conversations Conversation[]
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
 
   @@index([userId])
+}
+
+model Conversation {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  projectId String?
+  project   Project?  @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  title     String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  messages  Message[]
+
+  @@index([userId, updatedAt])
+  @@index([projectId])
+}
+
+model Message {
+  id             String          @id @default(cuid())
+  conversationId String
+  conversation   Conversation    @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  role           MessageRole
+  status         MessageStatus   @default(COMPLETED)
+  content        String
+  model          String?
+  provider       String?
+  errorMessage   String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  @@index([conversationId, createdAt])
+}
+
+model VideoGeneration {
+  id             String                @id @default(cuid())
+  prompt         String
+  provider       String                @default("google-vertex-ai")
+  model          String
+  status         VideoGenerationStatus @default(PENDING)
+  providerJobId  String?
+  outputUrl      String?
+  outputGcsUri   String?
+  projectId      String?
+  project        Project?              @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  userId         String
+  user           User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  aspectRatio    String?
+  durationSeconds Int?
+  resolution     String?
+  errorMessage   String?
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+  completedAt    DateTime?
+
+  @@index([userId, createdAt])
+  @@index([projectId])
+  @@index([status, updatedAt])
+  @@index([providerJobId])
 }
 
 model Image {
@@ -92,9 +191,18 @@ model Image {
 model Generation {
   id        String           @id @default(cuid())
   prompt    String
+  provider  String           @default("mock")
   model     String
   status    GenerationStatus @default(QUEUED)
   outputUrl String?
+  outputUrls Json?
+  width     Int?
+  height    Int?
+  aspectRatio String?
+  quality   String?
+  imageCount Int              @default(1)
+  errorMessage String?
+  completedAt DateTime?
   userId    String
   user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   projectId String?

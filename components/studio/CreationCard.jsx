@@ -1,0 +1,7 @@
+import { Download, FileImage, Film, FolderKanban, Trash2 } from "lucide-react";
+
+export function CreationCard({ item, onDelete }) {
+  const isImage = item.kind === "image";
+  const url = item.url;
+  return <article className="overflow-hidden rounded-2xl border border-white/[.08] bg-[#18181f]"><div className="relative aspect-[4/3] bg-[#101014]">{url && isImage && <img src={url} alt={item.title} className="h-full w-full object-cover" />}{url && !isImage && <video src={url} controls className="h-full w-full object-cover" />}{!url && <div className="flex h-full items-center justify-center text-zinc-700">{item.kind === "video" ? <Film size={28} /> : item.kind === "project" ? <FolderKanban size={28} /> : <FileImage size={28} />}</div>}<span className="absolute left-3 top-3 rounded-full border border-white/10 bg-black/60 px-2 py-1 text-[10px] uppercase tracking-wider text-zinc-300">{item.kind}</span></div><div className="p-4"><p className="line-clamp-2 text-sm font-semibold">{item.title}</p><p className="mt-1 text-xs text-zinc-500">{new Date(item.createdAt).toLocaleDateString()}</p><div className="mt-4 flex items-center justify-end gap-1">{url && <a href={url} download className="rounded-lg p-2 text-zinc-500 hover:bg-violet-500/10 hover:text-violet-300" aria-label="Download creation"><Download size={16} /></a>}{onDelete && <button onClick={() => onDelete(item)} className="rounded-lg p-2 text-zinc-500 hover:bg-red-500/10 hover:text-red-300" aria-label="Delete creation"><Trash2 size={16} /></button>}</div></div></article>;
+}

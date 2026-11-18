@@ -12,23 +12,18 @@ button, input, textarea, select { font: inherit; }
 .grid-bg { background-image: linear-gradient(rgba(24,24,27,.045) 1px, transparent 1px), linear-gradient(90deg, rgba(24,24,27,.045) 1px, transparent 1px); background-size: 32px 32px; }
 ::selection { background: rgba(139,92,246,.4); }
 
-/* Light workspace theme: preserve accent gradients while translating dark surfaces into readable neutrals. */
+/* Light workspace theme. The product UI uses dark utility classes for its
+   original workspace; these mappings keep the same layout while making the
+   selected light appearance readable and consistent. */
 [class~="bg-[#09090b]"] { background-color: #f5f5f5 !important; }
-[class~="bg-[#101014]"] { background-color: #ffffff !important; }
-[class~="bg-[#0d0d11]"] { background-color: #fafafa !important; }
-[class~="bg-[#141419]"] { background-color: #ffffff !important; }
-[class~="bg-[#15131d]"] { background-color: #ffffff !important; }
-[class~="bg-[#18181f]"] { background-color: #ffffff !important; }
-[class~="bg-[#20202A]"] { background-color: #fafafa !important; }
-[class~="bg-zinc-900"] { background-color: #ffffff !important; }
-[class~="bg-zinc-900/40"] { background-color: rgba(255,255,255,.7) !important; }
-[class~="bg-zinc-900/60"] { background-color: rgba(255,255,255,.85) !important; }
-[class~="bg-zinc-900/70"] { background-color: rgba(255,255,255,.9) !important; }
+[class~="bg-[#101014]"], [class~="bg-[#0d0d11]"], [class~="bg-[#141419]"], [class~="bg-[#15131d]"], [class~="bg-[#18181f]"], [class~="bg-[#20202A]"], [class~="bg-zinc-900"] { background-color: #ffffff !important; }
+[class~="bg-zinc-900/40"], [class~="bg-zinc-900/60"], [class~="bg-zinc-900/70"] { background-color: rgba(255,255,255,.82) !important; }
 [class~="bg-zinc-800"] { background-color: #f4f4f5 !important; }
-[class~="border-zinc-800"], [class~="border-zinc-800/70"], [class~="border-zinc-800/80"] { border-color: #e4e4e7 !important; }
+[class~="border-zinc-800"], [class~="border-zinc-800/70"], [class~="border-zinc-800/80"], [class~="border-white/[.07]"], [class~="border-white/[.08]"], [class~="border-white/[.09]"], [class~="border-white/[.1]"], [class~="border-white/10"] { border-color: #e4e4e7 !important; }
 [class~="border-zinc-700"] { border-color: #d4d4d8 !important; }
-[class~="text-zinc-200"] { color: #27272a !important; }
-[class~="text-zinc-300"] { color: #3f3f46 !important; }
+[class~="text-zinc-100"], [class~="text-zinc-200"], [class~="text-zinc-300"] { color: #27272a !important; }
 [class~="text-zinc-400"] { color: #52525b !important; }
 [class~="text-zinc-500"] { color: #71717a !important; }
-[class~="text-zinc-600"] { color: #a1a1aa !important; }
+[class~="text-zinc-600"], [class~="text-zinc-700"] { color: #a1a1aa !important; }
+[class~="text-white"] { color: #18181b !important; }
+button.bg-violet-500.text-white, a.bg-violet-500.text-white, button.bg-violet-400.text-white, a.bg-violet-400.text-white { color: #ffffff !important; }

@@ -1,34 +1,55 @@
-import { NextResponse } from "next/server";
-import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { projectUpdateSchema } from "@/lib/validations/project";
+import { jsonError, jsonSuccess } from "@/lib/api/errors";
+import { getRequestId, logRequest, parseBody } from "@/lib/api/request";
+import { requireAuthenticatedUser, requireOwnedProject } from "@/lib/auth/server";
 
-async function getOwnedProject(id, userId) { return prisma.project.findFirst({ where: { id, userId } }); }
-
-export async function GET(_request, { params }) {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Unauthenticated." }, { status: 401 });
-  const project = await getOwnedProject((await params).id, session.user.id);
-  if (!project) return NextResponse.json({ error: "Project not found." }, { status: 404 });
-  return NextResponse.json({ project });
+export async function GET(request, { params }) {
+  const requestId = getRequestId(request);
+  try {
+    const user = await requireAuthenticatedUser();
+    const project = await requireOwnedProject((await params).id, user.id);
+    const response = jsonSuccess({ project }, { requestId });
+    logRequest(request, { requestId, scope: "projects.get", status: 200 });
+    return response;
+  } catch (error) {
+    const response = jsonError(error, { requestId });
+    logRequest(request, { requestId, scope: "projects.get", status: response.status });
+    return response;
+  }
 }
 
 export async function PATCH(request, { params }) {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Unauthenticated." }, { status: 401 });
-  const id = (await params).id;
-  if (!await getOwnedProject(id, session.user.id)) return NextResponse.json({ error: "Project not found." }, { status: 404 });
-  const parsed = projectUpdateSchema.safeParse(await request.json());
-  if (!parsed.success) return NextResponse.json({ error: "Invalid project details.", fields: parsed.error.flatten().fieldErrors }, { status: 400 });
-  const project = await prisma.project.update({ where: { id }, data: parsed.data });
-  return NextResponse.json({ project });
+  const requestId = getRequestId(request);
+  try {
+    const user = await requireAuthenticatedUser();
+    const id = (await params).id;
+    await requireOwnedProject(id, user.id);
+    const parsed = await parseBody(request, projectUpdateSchema);
+    const project = await prisma.project.update({ where: { id }, data: parsed });
+    const response = jsonSuccess({ project }, { requestId });
+    logRequest(request, { requestId, scope: "projects.update", status: 200 });
+    return response;
+  } catch (error) {
+    const response = jsonError(error, { requestId });
+    logRequest(request, { requestId, scope: "projects.update", status: response.status });
+    return response;
+  }
 }
 
-export async function DELETE(_request, { params }) {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Unauthenticated." }, { status: 401 });
-  const id = (await params).id;
-  if (!await getOwnedProject(id, session.user.id)) return NextResponse.json({ error: "Project not found." }, { status: 404 });
-  await prisma.project.delete({ where: { id } });
-  return new NextResponse(null, { status: 204 });
+export async function DELETE(request, { params }) {
+  const requestId = getRequestId(request);
+  try {
+    const user = await requireAuthenticatedUser();
+    const id = (await params).id;
+    await requireOwnedProject(id, user.id);
+    await prisma.project.delete({ where: { id } });
+    const response = jsonSuccess({ deleted: true }, { requestId });
+    logRequest(request, { requestId, scope: "projects.delete", status: 200 });
+    return response;
+  } catch (error) {
+    const response = jsonError(error, { requestId });
+    logRequest(request, { requestId, scope: "projects.delete", status: response.status });
+    return response;
+  }
 }
