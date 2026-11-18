@@ -12,7 +12,10 @@ export default auth((request) => {
     loginUrl.searchParams.set("callbackUrl", pathname);
     return Response.redirect(loginUrl);
   }
-  if ((pathname === "/login" || pathname === "/register") && request.auth) return Response.redirect(new URL("/dashboard", request.url));
+  // Do not force an authenticated request away from /login or /register.
+  // If the session exists but the user lookup fails (for example while a
+  // production database is unavailable), redirecting both ways creates an
+  // endless /dashboard <-> /login loop.
 });
 
 export const config = { matcher: ["/dashboard/:path*", "/editor/:path*", "/generate/:path*", "/projects/:path*", "/history/:path*", "/settings/:path*", "/profile/:path*", "/chat/:path*", "/video/:path*", "/creations/:path*", "/plans/:path*", "/admin/:path*", "/login", "/register"] };
